@@ -1,9 +1,12 @@
 from selenium import webdriver
 import time, yaml
+import json, icalendar
+
+from event import CourseEvent
 
 driver = webdriver.Firefox()
 
-credentials = yaml.load('credentials')
+credentials = yaml.load(open('credentials.yaml'))
 
 courses = []
 
@@ -19,13 +22,14 @@ def get_term_info(term):
     time.sleep(2)
     _courses = driver.find_elements_by_class_name('PSGROUPBOXWBO')[1:]
     for course in _courses:
-        c = {}
-        c['name'] = course.find_element_by_class_name('PAGROUPDIVIDER').get_attribute('innerHTML')
-        c['number'], c['section'], c['component'], c['times'], c['room'], c['instructor'], c['start_end'] =\
-            map(lambda x: x.text,
-                course.find_elements_by_tag_name('tr')[-1].find_elements_by_tag_name('td')
-            )
-        courses.append(c)
+        for comp in course.find_elements_by_class_name('PSLEVEL3GRID')[1].find_elements_by_tag_name('tr')[1:]:
+            c = {}
+            c['name'] = course.find_element_by_class_name('PAGROUPDIVIDER').get_attribute('innerHTML')
+            c['number'], c['section'], c['component'], c['times'], c['room'], c['instructor'], c['start_end'] =\
+                map(lambda x: x.text,
+                    comp.find_elements_by_tag_name('td')
+                )
+            courses.append(c)
 
 def get_courses():
     url = 'https://campus.concordia.ca/psc/pscsprd/EMPLOYEE/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL?Page=SSR_SSENRL_LIST&Action=A&TargetFrameName=None'
@@ -38,10 +42,22 @@ def get_courses():
         terms = gt()
         get_term_info(terms[nterms-1])
         nterms -= 1
-    0
+    # json.dump(courses, open('courses.json', 'w'))
+    driver.close()
+
+def dump_cals():
+    # courses = json.load(open('courses.json'))
+    cal = icalendar.Calendar()
+
+    for course in courses:
+        event = CourseEvent(**course)
+        cal.add_component(event.as_ical())
+
+    with open('output.ics', 'wb') as f:
+        f.write(cal.to_ical())
 
 def main():
     login()
     get_courses()
-
+    dump_cals()
 main()

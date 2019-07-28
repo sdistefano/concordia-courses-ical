@@ -32,7 +32,7 @@ Instructor: {}
         for x in range(int(len(days) / 2)):
             fdays.append(days[x*2:x*2+2])
 
-        self.repeat_rule = {'freq': 'weekly', 'count': nclasses, 'byday': fdays}
+        self.repeat_rule = {'freq': 'weekly', 'count': 13, 'byday': fdays}
 
         if WRITE_AS_UTC:
             self.start_time = pytz.utc.normalize(self.start_time.astimezone(pytz.utc))

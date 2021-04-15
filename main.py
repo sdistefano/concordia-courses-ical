@@ -17,8 +17,9 @@ def login():
     driver.find_element_by_class_name('form_button_submit').click()
 
 def get_term_info(term):
-    term.find_elements_by_tag_name('td')[0].find_element_by_tag_name('input').click()
-    driver.find_element_by_id('DERIVED_SSS_SCT_SSR_PB_GO').click()
+    term.find_elements_by_tag_name('td')[0].find_element_by_tag_name('label').click()
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    driver.find_element_by_css_selector('[gh-item-link=DERIVED_SSS_SCT_SSR_PB_GO]').click()
     time.sleep(2)
     _courses = driver.find_elements_by_class_name('PSGROUPBOXWBO')[1:]
     for course in _courses:
